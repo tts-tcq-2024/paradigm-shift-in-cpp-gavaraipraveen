@@ -4,59 +4,26 @@
 #include <tuple>
 using namespace std;
 
-struct CheckResult {
-  bool isOk;
-  string message;
-};
-
 // Function to check temperature
-CheckResult checkTemperature(float temperature) {
-  if (temperature < 0) {
-    return {false, "Temperature too low!"};
-  } else if (temperature > 45) {
-    return {false, "Temperature too high!"};
-  }
-  return {true, ""};
+bool checkTemperature(float temperature) {
+    return temperature < 0 || temperature > 45;
 }
 
 // Function to check state of charge (SOC)
-CheckResult checkSoc(float soc) {
-  if (soc < 20) {
-    return {false, "State of Charge too low!"};
-  } else if (soc > 80) {
-    return {false, "State of Charge too high!"};
-  }
-  return {true, ""};
+bool checkSoc(float soc) {
+    return soc < 20 || soc > 80;
 }
 
 // Function to check charge rate
-CheckResult checkChargeRate(float chargeRate) {
-  if (chargeRate > 0.8) {
-    return {false, "Charge Rate too high!"};
-  }
-  return {true, ""};
+bool checkChargeRate(float chargeRate) {
+    return chargeRate > 0.8;
 }
 
 // Function to check all parameters
 bool batteryIsOk(float temperature, float soc, float chargeRate) {
-  auto tempResult = checkTemperature(temperature);
-  auto socResult = checkSoc(soc);
-  auto chargeRateResult = checkChargeRate(chargeRate);
-
-  if (!tempResult.isOk) {
-    cout << tempResult.message << "\n";
-    return false;
-  }
-  if (!socResult.isOk) {
-    cout << socResult.message << "\n";
-    return false;
-  }
-  if (!chargeRateResult.isOk) {
-    cout << chargeRateResult.message << "\n";
-    return false;
-  }
-
-  return true;
+  return !checkTemperature(temperature) &&
+         !checkSoc(soc) &&
+         !checkChargeRate(chargeRate);
 }
 
 // Function to run tests
