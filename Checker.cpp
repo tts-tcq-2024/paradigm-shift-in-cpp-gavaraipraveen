@@ -1,7 +1,6 @@
 #include <assert.h>
 #include <iostream>
-#include <string>
-#include <tuple>
+
 using namespace std;
 
 // Function to check temperature
