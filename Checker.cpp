@@ -42,12 +42,14 @@ bool checkBelowLimit(float value, const ParameterThresholds& thresholds) {
     return value < thresholds.lowerLimit;
 }
 
-// Function to check status for warning range
-bool checkWarningRange(float value, const ParameterThresholds& thresholds) {
-    float lowerWarningLimit = thresholds.lowerLimit + thresholds.warningTolerance;
-    float upperWarningLimit = thresholds.upperLimit - thresholds.warningTolerance;
-    return (value >= thresholds.lowerLimit && value < lowerWarningLimit) || 
-           (value >= upperWarningLimit && value < thresholds.upperLimit);
+// Function to check status for warning range below
+bool checkWarningRangeBelow(float value, const ParameterThresholds& thresholds) {
+    return value >= thresholds.lowerLimit && value < thresholds.lowerLimit + thresholds.warningTolerance;
+}
+
+// Function to check status for warning range above
+bool checkWarningRangeAbove(float value, const ParameterThresholds& thresholds) {
+    return value >= thresholds.upperLimit - thresholds.warningTolerance && value < thresholds.upperLimit;
 }
 
 // Function to check status for above limit
@@ -60,8 +62,11 @@ string getParameterStatusMessage(float value, const ParameterThresholds& thresho
     if (checkBelowLimit(value, thresholds)) {
         return getBelowLimitMessage(parameterName);
     }
-    if (checkWarningRange(value, thresholds)) {
+    if (checkWarningRangeBelow(value, thresholds)) {
         return getWarningMessage("Warning: Approaching discharge", "Warnung: Nahe der Entladung");
+    }
+    if (checkWarningRangeAbove(value, thresholds)) {
+        return getWarningMessage("Warning: Approaching charge-peak", "Warnung: Nahe der Ladespitze");
     }
     if (checkAboveLimit(value, thresholds)) {
         return getAboveLimitMessage(parameterName);
@@ -87,15 +92,24 @@ string checkChargeRate(float chargeRate) {
     return getParameterStatusMessage(chargeRate, chargeRateThresholds, "Charge rate");
 }
 
+// Function to check if each parameter is ok
+bool isParameterOk(float value, const ParameterThresholds& thresholds) {
+    return !(checkBelowLimit(value, thresholds) || checkAboveLimit(value, thresholds));
+}
+
 // Function to check all parameters
 bool batteryIsOk(float temperature, float soc, float chargeRate) {
+    ParameterThresholds temperatureThresholds = {0, 45, 2.25};
+    ParameterThresholds socThresholds = {20, 80, 4};
+    ParameterThresholds chargeRateThresholds = {0, 0.8, 0.04};
+
     cout << checkTemperature(temperature) << endl;
     cout << checkSoc(soc) << endl;
     cout << checkChargeRate(chargeRate) << endl;
 
-    return (temperature >= 0 && temperature <= 45) &&
-           (soc >= 20 && soc <= 80) &&
-           (chargeRate <= 0.8);
+    return isParameterOk(temperature, temperatureThresholds) &&
+           isParameterOk(soc, socThresholds) &&
+           isParameterOk(chargeRate, chargeRateThresholds);
 }
 
 // Function to run tests
