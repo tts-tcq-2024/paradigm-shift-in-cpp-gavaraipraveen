@@ -57,21 +57,35 @@ bool checkAboveLimit(float value, const ParameterThresholds& thresholds) {
     return value > thresholds.upperLimit;
 }
 
-// Function to generate the parameter status message
-string getParameterStatusMessage(float value, const ParameterThresholds& thresholds, const string& parameterName) {
+// Function to handle parameter limits
+string handleParameterLimit(float value, const ParameterThresholds& thresholds, const string& parameterName) {
     if (checkBelowLimit(value, thresholds)) {
         return getBelowLimitMessage(parameterName);
     }
+    if (checkAboveLimit(value, thresholds)) {
+        return getAboveLimitMessage(parameterName);
+    }
+    return translateMessage(parameterName + " is normal", parameterName + " ist normal");
+}
+
+// Function to handle parameter warnings
+string handleParameterWarning(float value, const ParameterThresholds& thresholds) {
     if (checkWarningRangeBelow(value, thresholds)) {
         return getWarningMessage("Warning: Approaching discharge", "Warnung: Nahe der Entladung");
     }
     if (checkWarningRangeAbove(value, thresholds)) {
         return getWarningMessage("Warning: Approaching charge-peak", "Warnung: Nahe der Ladespitze");
     }
-    if (checkAboveLimit(value, thresholds)) {
-        return getAboveLimitMessage(parameterName);
+    return "";
+}
+
+// Function to generate the parameter status message
+string getParameterStatusMessage(float value, const ParameterThresholds& thresholds, const string& parameterName) {
+    string warningMessage = handleParameterWarning(value, thresholds);
+    if (!warningMessage.empty()) {
+        return warningMessage;
     }
-    return translateMessage(parameterName + " is normal", parameterName + " ist normal");
+    return handleParameterLimit(value, thresholds, parameterName);
 }
 
 // Function to check temperature
